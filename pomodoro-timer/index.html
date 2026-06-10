@@ -6,98 +6,138 @@
 <title>🍅 番茄时钟</title>
 <style>
   :root {
-    --work: #e74c3c;
-    --break: #2ecc71;
-    --long-break: #3498db;
-    --bg: #1a1a2e;
-    --surface: #16213e;
+    --bg: #0f0f1a;
+    --card: #1a1a2e;
+    --card2: #16213e;
+    --accent: #e74c3c;
+    --accent2: #2ecc71;
+    --accent3: #3498db;
     --text: #eee;
-    --muted: #999;
+    --text2: #aaa;
+    --text3: #666;
+    --ring-bg: #1e1e36;
+    --danger: #e74c3c;
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.25);
+    --font: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'PingFang SC', monospace;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-family: var(--font);
     background: var(--bg);
     color: var(--text);
+    min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+    align-items: flex-start;
+    padding: 16px;
     user-select: none;
     -webkit-user-select: none;
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(231,76,60,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(52,152,219,0.06) 0%, transparent 60%);
   }
 
-  .container {
-    text-align: center;
-    padding: 40px;
+  .app {
+    display: flex;
+    gap: 24px;
+    max-width: 960px;
+    width: 100%;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
-  /* ---- 模式切换 ---- */
+  /* ========== 左侧：计时器 ========== */
+  .timer-panel {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 36px 32px 28px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 340px;
+    max-width: 420px;
+    flex: 1;
+    border: 1px solid rgba(255,255,255,0.05);
+    position: relative;
+  }
+
+  .sound-toggle {
+    position: absolute;
+    top: 18px;
+    left: 22px;
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 20px;
+    transition: color 0.2s;
+    padding: 4px;
+  }
+  .sound-toggle:hover { color: var(--text); }
+  .sound-toggle.muted { opacity: 0.4; }
+
+  /* 模式切换 */
   .mode-tabs {
     display: flex;
-    gap: 8px;
-    justify-content: center;
-    margin-bottom: 40px;
-    background: var(--surface);
-    border-radius: 16px;
-    padding: 6px;
-    display: inline-flex;
+    gap: 6px;
+    background: var(--card2);
+    border-radius: 14px;
+    padding: 5px;
+    margin-bottom: 32px;
   }
-
   .mode-tab {
-    padding: 10px 24px;
-    border-radius: 12px;
+    padding: 9px 18px;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
     background: transparent;
-    color: var(--muted);
+    color: var(--text2);
     transition: all 0.25s;
     font-family: inherit;
+    white-space: nowrap;
   }
+  .mode-tab.active { background: rgba(255,255,255,0.08); color: #fff; }
+  .mode-tab.work.active { color: #f87171; }
+  .mode-tab.break.active { color: #4ade80; }
+  .mode-tab.long.active { color: #60a5fa; }
 
-  .mode-tab.active {
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-  }
-
-  .mode-tab.work.active   { color: #f87171; }
-  .mode-tab.break.active  { color: #4ade80; }
-  .mode-tab.long.active   { color: #60a5fa; }
-
-  /* ---- 圆形计时器 ---- */
-  .timer-ring-wrapper {
+  /* 环形计时器 */
+  .ring-wrapper {
     position: relative;
-    width: 320px;
-    height: 320px;
-    margin: 0 auto 36px;
+    width: 280px;
+    height: 280px;
+    margin-bottom: 30px;
   }
-
-  .timer-ring {
+  .ring-svg {
     transform: rotate(-90deg);
-    width: 320px;
-    height: 320px;
+    width: 280px;
+    height: 280px;
   }
-
   .ring-bg {
     fill: none;
-    stroke: var(--surface);
-    stroke-width: 8;
+    stroke: var(--ring-bg);
+    stroke-width: 6;
   }
-
   .ring-fg {
     fill: none;
-    stroke: var(--work);
-    stroke-width: 8;
+    stroke: var(--accent);
+    stroke-width: 6;
     stroke-linecap: round;
     transition: stroke-dashoffset 0.3s linear, stroke 0.4s;
   }
-
-  .ring-fg.break { stroke: var(--break); }
-  .ring-fg.long  { stroke: var(--long-break); }
+  .ring-fg.break { stroke: var(--accent2); }
+  .ring-fg.long { stroke: var(--accent3); }
 
   .timer-text {
     position: absolute;
@@ -107,565 +147,917 @@
     align-items: center;
     justify-content: center;
   }
-
   .time-display {
-    font-size: 72px;
-    font-weight: 300;
-    letter-spacing: 2px;
+    font-size: 56px;
+    font-weight: 200;
+    letter-spacing: 3px;
+    font-family: var(--mono);
     font-variant-numeric: tabular-nums;
-    font-family: 'SF Mono', 'Cascadia Code', 'Consolas', 'PingFang SC', monospace;
   }
-
   .status-label {
-    font-size: 14px;
-    color: var(--muted);
+    font-size: 13px;
+    color: var(--text2);
     margin-top: 6px;
     letter-spacing: 1px;
     text-transform: uppercase;
+    transition: color 0.3s;
   }
+  .status-label.urgent { color: var(--danger); animation: pulse 0.5s infinite; }
+  @keyframes pulse { 50% { opacity: 0.5; } }
 
-  /* ---- 按钮 ---- */
+  /* 按钮 */
   .btn-row {
     display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
   }
-
   .btn {
-    width: 56px;
-    height: 56px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.15);
     background: transparent;
     color: #fff;
     cursor: pointer;
-    font-size: 22px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
   }
-
-  .btn:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(255,255,255,0.4);
+  .btn:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.3); }
+  .btn:active { transform: scale(0.92); }
+  .btn-main {
+    width: 68px;
+    height: 68px;
+    font-size: 26px;
+    border-color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.04);
   }
+  .btn-main.running { border-color: var(--accent); color: var(--accent); }
 
-  .btn:active {
-    transform: scale(0.93);
-  }
-
-  .btn-play {
-    width: 72px;
-    height: 72px;
-    font-size: 28px;
-    border-color: rgba(255,255,255,0.5);
-  }
-
-  .btn-play.running {
-    border-color: var(--work);
-    color: var(--work);
-  }
-
-  /* ---- 统计 ---- */
-  .stats {
+  /* 今日统计 */
+  .today-stats {
     display: flex;
-    gap: 32px;
-    justify-content: center;
-    margin-top: 36px;
+    gap: 28px;
+    margin-top: 24px;
   }
+  .stat { text-align: center; }
+  .stat-val { font-size: 24px; font-weight: 700; }
+  .stat-lbl { font-size: 11px; color: var(--text2); margin-top: 2px; letter-spacing: 0.5px; }
 
-  .stat {
-    text-align: center;
-  }
-
-  .stat-value {
-    font-size: 28px;
-    font-weight: 700;
-  }
-
-  .stat-label {
-    font-size: 12px;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-
-  /* ---- 设置 ---- */
-  .settings-toggle {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 18px;
-    position: absolute;
-    top: 20px;
-    right: 24px;
-    transition: color 0.2s;
-  }
-
-  .settings-toggle:hover {
-    color: #fff;
-  }
-
-  .settings-panel {
-    display: none;
-    margin-top: 32px;
-    gap: 20px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .settings-panel.show {
-    display: flex;
-  }
-
-  .setting-item {
+  /* ========== 右侧：任务 & 设置 ========== */
+  .side-panel {
+    flex: 1;
+    min-width: 300px;
+    max-width: 420px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 6px;
+    gap: 20px;
   }
 
-  .setting-item label {
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 22px 20px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text2);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* 任务列表 */
+  .task-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .task-input-row input {
+    flex: 1;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--card2);
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .task-input-row input:focus { border-color: var(--accent3); }
+  .task-input-row input::placeholder { color: var(--text3); }
+
+  .est-input {
+    width: 48px;
+    text-align: center;
+  }
+  .btn-add {
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    border: none;
+    background: var(--accent3);
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: background 0.2s, transform 0.15s;
+    white-space: nowrap;
+  }
+  .btn-add:hover { background: #2980b9; }
+  .btn-add:active { transform: scale(0.96); }
+
+  .task-list { list-style: none; max-height: 240px; overflow-y: auto; }
+  .task-list::-webkit-scrollbar { width: 4px; }
+  .task-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 10px;
+    border-radius: var(--radius-sm);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .task-item:hover { background: rgba(255,255,255,0.03); }
+  .task-item.active-task { background: rgba(52,152,219,0.12); border: 1px solid rgba(52,152,219,0.3); }
+
+  .task-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.25);
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 12px;
-    color: var(--muted);
+    transition: all 0.2s;
+    background: transparent;
+    color: transparent;
+  }
+  .task-check:hover { border-color: var(--success); }
+  .task-check.done {
+    background: var(--success);
+    border-color: var(--success);
+    color: #fff;
+  }
+
+  .task-name { flex: 1; font-size: 14px; }
+  .task-item.done-item .task-name { text-decoration: line-through; color: var(--text3); }
+  .task-pomos { font-size: 11px; color: var(--text3); display: flex; gap: 2px; }
+  .task-pomos .dot { color: var(--accent); }
+  .task-pomos .dot.earned { color: var(--success); }
+  .task-delete {
+    background: none; border: none; color: var(--text3);
+    cursor: pointer; font-size: 16px; padding: 2px 4px;
+    opacity: 0; transition: opacity 0.2s, color 0.2s;
+  }
+  .task-item:hover .task-delete { opacity: 1; }
+  .task-delete:hover { color: var(--danger); }
+
+  .no-tasks {
+    text-align: center;
+    color: var(--text3);
+    font-size: 13px;
+    padding: 24px 0;
+  }
+
+  /* 设置 */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  .setting-item { text-align: center; }
+  .setting-item label {
+    display: block;
+    font-size: 10px;
+    color: var(--text2);
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-bottom: 6px;
   }
-
   .setting-item input {
-    width: 64px;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.2);
-    background: var(--surface);
+    width: 100%;
+    padding: 9px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255,255,255,0.1);
+    background: var(--card2);
     color: #fff;
     text-align: center;
-    font-size: 16px;
+    font-size: 15px;
     font-family: inherit;
+    outline: none;
   }
+  .setting-item input:focus { border-color: var(--accent3); }
 
-  /* ---- 完成提示 ---- */
+  /* Toast */
   .toast {
     position: fixed;
-    top: 24px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%) translateY(-120px);
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,0.2);
+    background: var(--card);
+    border: 1px solid rgba(255,255,255,0.15);
     padding: 14px 28px;
     border-radius: 12px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    z-index: 10;
+    z-index: 100;
     pointer-events: none;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
   }
+  .toast.show { transform: translateX(-50%) translateY(0); }
 
-  .toast.show {
-    transform: translateX(-50%) translateY(0);
+  /* 响应式 */
+  @media (max-width: 780px) {
+    .app { flex-direction: column; align-items: center; }
+    .timer-panel, .side-panel { max-width: 100%; width: 100%; }
+    .ring-wrapper { width: 240px; height: 240px; }
+    .ring-svg { width: 240px; height: 240px; }
+    .time-display { font-size: 46px; }
   }
 </style>
 </head>
 <body>
 
-<button class="settings-toggle" id="settingsBtn" title="设置">⚙</button>
+<div class="app">
+  <!-- ======== 计时器面板 ======== -->
+  <div class="timer-panel">
+    <button class="sound-toggle" id="soundToggle" title="音效开关">🔊</button>
 
-<div class="container">
-  <!-- 模式 -->
-  <div class="mode-tabs" id="modeTabs">
-    <button class="mode-tab work active" data-mode="work">🍅 专注</button>
-    <button class="mode-tab break" data-mode="break">☕ 短休息</button>
-    <button class="mode-tab long" data-mode="long-break">🌿 长休息</button>
-  </div>
+    <div class="mode-tabs" id="modeTabs">
+      <button class="mode-tab work active" data-mode="work">🍅 专注</button>
+      <button class="mode-tab break" data-mode="break">☕ 短休息</button>
+      <button class="mode-tab long" data-mode="long-break">🌿 长休息</button>
+    </div>
 
-  <!-- 圆形计时器 -->
-  <div class="timer-ring-wrapper">
-    <svg class="timer-ring" viewBox="0 0 200 200">
-      <circle class="ring-bg" cx="100" cy="100" r="92"/>
-      <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="92"
-              stroke-dasharray="578.053"
-              stroke-dashoffset="0"/>
-    </svg>
-    <div class="timer-text">
-      <div class="time-display" id="timeDisplay">25:00</div>
-      <div class="status-label" id="statusLabel">准备开始</div>
+    <div class="ring-wrapper">
+      <svg class="ring-svg" viewBox="0 0 200 200">
+        <circle class="ring-bg" cx="100" cy="100" r="92"/>
+        <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="92"
+                stroke-dasharray="578.053" stroke-dashoffset="0"/>
+      </svg>
+      <div class="timer-text">
+        <div class="time-display" id="timeDisplay">25:00</div>
+        <div class="status-label" id="statusLabel">准备开始</div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btnReset" title="重置 (R)">⟳</button>
+      <button class="btn btn-main" id="btnPlay" title="开始 (空格)">▶</button>
+      <button class="btn" id="btnSkip" title="跳过 (S)">⏭</button>
+    </div>
+
+    <div class="today-stats">
+      <div class="stat">
+        <div class="stat-val" id="sessionCount">0</div>
+        <div class="stat-lbl">今日番茄</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="focusMinutes">0</div>
+        <div class="stat-lbl">专注分钟</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val" id="streakDays">0</div>
+        <div class="stat-lbl">连续天数</div>
+      </div>
     </div>
   </div>
 
-  <!-- 按钮 -->
-  <div class="btn-row">
-    <button class="btn" id="btnReset" title="重置">⟳</button>
-    <button class="btn btn-play" id="btnPlay" title="开始">▶</button>
-    <button class="btn" id="btnSkip" title="跳过">⏭</button>
-  </div>
+  <!-- ======== 侧边栏 ======== -->
+  <div class="side-panel">
+    <!-- 任务列表 -->
+    <div class="card">
+      <div class="card-title">
+        任务列表
+        <span style="font-weight:400;font-size:12px;color:var(--text3)" id="taskCount">0 个任务</span>
+      </div>
+      <div class="task-input-row">
+        <input type="text" id="taskInput" placeholder="添加任务..." maxlength="60">
+        <input type="number" id="estPomos" class="est-input" value="1" min="1" max="20" title="预计番茄数">
+        <button class="btn-add" id="btnAddTask">添加</button>
+      </div>
+      <ul class="task-list" id="taskList">
+        <li class="no-tasks">还没有任务，添加一个吧 ✨</li>
+      </ul>
+      <div style="margin-top: 12px; display: flex; gap: 8px; justify-content: flex-end;">
+        <button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;font-family:inherit"
+                id="btnClearDone">清除已完成</button>
+      </div>
+    </div>
 
-  <!-- 统计 -->
-  <div class="stats">
-    <div class="stat">
-      <div class="stat-value" id="sessionCount">0</div>
-      <div class="stat-label">今日番茄</div>
-    </div>
-    <div class="stat">
-      <div class="stat-value" id="totalMinutes">0</div>
-      <div class="stat-label">专注分钟</div>
-    </div>
-  </div>
-
-  <!-- 设置面板 -->
-  <div class="settings-panel" id="settingsPanel">
-    <div class="setting-item">
-      <label>专注 (分钟)</label>
-      <input type="number" id="workMin" value="25" min="1" max="120">
-    </div>
-    <div class="setting-item">
-      <label>短休息 (分钟)</label>
-      <input type="number" id="breakMin" value="5" min="1" max="60">
-    </div>
-    <div class="setting-item">
-      <label>长休息 (分钟)</label>
-      <input type="number" id="longBreakMin" value="15" min="1" max="60">
+    <!-- 时长设置 -->
+    <div class="card">
+      <div class="card-title">⏱ 时长设置</div>
+      <div class="settings-grid">
+        <div class="setting-item">
+          <label>专注 (分)</label>
+          <input type="number" id="workMin" value="25" min="1" max="120">
+        </div>
+        <div class="setting-item">
+          <label>短休息 (分)</label>
+          <input type="number" id="breakMin" value="5" min="1" max="60">
+        </div>
+        <div class="setting-item">
+          <label>长休息 (分)</label>
+          <input type="number" id="longBreakMin" value="15" min="1" max="60">
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-  const CIRCUMFERENCE = 2 * Math.PI * 92; // ~578.053
+// ==================== 常量 ====================
+const CIRCUMFERENCE = 2 * Math.PI * 92; // ~578.053
+const STORAGE_KEY = 'pomodoro_data_v2';
 
-  // ---- 状态 ----
-  const state = {
-    mode: 'work',           // work | break | long-break
-    running: false,
-    secondsLeft: 25 * 60,
-    totalSeconds: 25 * 60,
-    sessionCount: 0,
-    totalWorkMinutes: 0,
-    timerId: null,
+// ==================== DOM ====================
+const $ = id => document.getElementById(id);
+const timeDisplay   = $('timeDisplay');
+const statusLabel   = $('statusLabel');
+const ringFg        = $('ringFg');
+const btnPlay       = $('btnPlay');
+const modeTabs      = $('modeTabs');
+const sessionEl     = $('sessionCount');
+const focusMinEl    = $('focusMinutes');
+const streakEl      = $('streakDays');
+const toast         = $('toast');
+const taskList      = $('taskList');
+const taskInput     = $('taskInput');
+const estPomos      = $('estPomos');
+const soundToggle   = $('soundToggle');
+const taskCountEl   = $('taskCount');
+
+const workInput     = $('workMin');
+const breakInput    = $('breakMin');
+const longBreakInput = $('longBreakMin');
+
+// ==================== 状态 ====================
+const state = {
+  mode: 'work',
+  running: false,
+  secondsLeft: 25 * 60,
+  totalSeconds: 25 * 60,
+  todayPomos: 0,
+  todayFocusMin: 0,
+  todayDate: '',
+  streakDays: 0,
+  soundEnabled: true,
+  tasks: [],          // { id, name, estPomos, donePomos, done }
+  activeTaskId: null,
+  timerId: null,
+  history: {},        // { 'YYYY-MM-DD': { pomos, focusMin } }
+};
+
+// ==================== 持久化 ====================
+function saveData() {
+  const data = {
+    workMin: workInput.value,
+    breakMin: breakInput.value,
+    longBreakMin: longBreakInput.value,
+    soundEnabled: state.soundEnabled,
+    todayDate: state.todayDate,
+    todayPomos: state.todayPomos,
+    todayFocusMin: state.todayFocusMin,
+    streakDays: state.streakDays,
+    tasks: state.tasks,
+    activeTaskId: state.activeTaskId,
+    history: state.history,
   };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
-  // ---- DOM refs ----
-  const timeDisplay   = document.getElementById('timeDisplay');
-  const statusLabel   = document.getElementById('statusLabel');
-  const ringFg        = document.getElementById('ringFg');
-  const btnPlay       = document.getElementById('btnPlay');
-  const btnReset      = document.getElementById('btnReset');
-  const btnSkip       = document.getElementById('btnSkip');
-  const modeTabs      = document.getElementById('modeTabs');
-  const sessionEl     = document.getElementById('sessionCount');
-  const totalMinEl    = document.getElementById('totalMinutes');
-  const settingsPanel = document.getElementById('settingsPanel');
-  const settingsBtn   = document.getElementById('settingsBtn');
-  const toast         = document.getElementById('toast');
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data.workMin) workInput.value = data.workMin;
+    if (data.breakMin) breakInput.value = data.breakMin;
+    if (data.longBreakMin) longBreakInput.value = data.longBreakMin;
+    state.soundEnabled = data.soundEnabled ?? true;
+    state.todayDate = data.todayDate || '';
+    state.todayPomos = data.todayPomos || 0;
+    state.todayFocusMin = data.todayFocusMin || 0;
+    state.streakDays = data.streakDays || 0;
+    state.tasks = data.tasks || [];
+    state.activeTaskId = data.activeTaskId || null;
+    state.history = data.history || {};
+  } catch (_) { /* ignore */ }
+}
 
-  // 设置输入
-  const workInput     = document.getElementById('workMin');
-  const breakInput    = document.getElementById('breakMin');
-  const longBreakInput = document.getElementById('longBreakMin');
+// ==================== 今日检测 ====================
+function getToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
-  // ---- 工具函数 ----
-  function formatTime(sec) {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-  }
-
-  function getDuration(mode) {
-    switch (mode) {
-      case 'work':       return parseInt(workInput.value) * 60;
-      case 'break':      return parseInt(breakInput.value) * 60;
-      case 'long-break': return parseInt(longBreakInput.value) * 60;
-      default:           return 25 * 60;
+function checkToday() {
+  const today = getToday();
+  if (state.todayDate !== today) {
+    // 把昨天的数据写入历史
+    if (state.todayDate && (state.todayPomos > 0 || state.todayFocusMin > 0)) {
+      state.history[state.todayDate] = {
+        pomos: state.todayPomos,
+        focusMin: state.todayFocusMin,
+      };
     }
+    state.todayDate = today;
+    state.todayPomos = 0;
+    state.todayFocusMin = 0;
+    computeStreak();
   }
+}
 
-  function getModeLabel(mode) {
-    switch (mode) {
-      case 'work':       return '专注中…';
-      case 'break':      return '休息一下';
-      case 'long-break': return '深度放松';
-      default:           return '';
+function computeStreak() {
+  let streak = 0;
+  const d = new Date();
+  // 今天算一天（如果今天有番茄，后面会 +1）
+  while (true) {
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (key === state.todayDate) {
+      // 今天，看当前数据
+      if (state.todayPomos > 0) streak++;
+      else break;
+    } else if (state.history[key] && state.history[key].pomos > 0) {
+      streak++;
+    } else {
+      break;
     }
+    d.setDate(d.getDate() - 1);
   }
+  state.streakDays = streak;
+}
 
-  // ---- 渲染 ----
-  function updateDisplay() {
-    timeDisplay.textContent = formatTime(state.secondsLeft);
+// ==================== 音频 ====================
+function playChime() {
+  if (!state.soundEnabled) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.5);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + i * 0.15);
+      osc.stop(ctx.currentTime + i * 0.15 + 0.5);
+    });
+  } catch (_) {}
+}
 
-    // 环形进度
-    const fraction = state.secondsLeft / state.totalSeconds;
-    ringFg.style.strokeDashoffset = CIRCUMFERENCE * (1 - fraction);
+function playTick() {
+  if (!state.soundEnabled) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.08);
+  } catch (_) {}
+}
 
-    // 环形颜色
-    ringFg.classList.remove('break', 'long');
-    if (state.mode === 'break')      ringFg.classList.add('break');
-    else if (state.mode === 'long-break') ringFg.classList.add('long');
+// ==================== 通知 ====================
+function notify(title, body) {
+  if (Notification.permission === 'granted') {
+    new Notification(title, { body, icon: '🍅' });
+  } else if (Notification.permission !== 'denied') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') new Notification(title, { body, icon: '🍅' });
+    });
   }
+}
 
-  function updateStatusLabel() {
+let toastTimer;
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ==================== 渲染 ====================
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function updateDisplay() {
+  timeDisplay.textContent = formatTime(state.secondsLeft);
+  const fraction = state.secondsLeft / state.totalSeconds;
+  ringFg.style.strokeDashoffset = CIRCUMFERENCE * (1 - fraction);
+
+  ringFg.classList.remove('break', 'long');
+  if (state.mode === 'break') ringFg.classList.add('break');
+  else if (state.mode === 'long-break') ringFg.classList.add('long');
+
+  // 最后 10 秒闪烁
+  if (state.running && state.secondsLeft <= 10 && state.secondsLeft > 0) {
+    statusLabel.textContent = state.secondsLeft + ' 秒';
+    statusLabel.classList.add('urgent');
+  } else {
+    statusLabel.classList.remove('urgent');
     if (!state.running && state.secondsLeft === state.totalSeconds) {
       statusLabel.textContent = '准备开始';
     } else if (!state.running) {
       statusLabel.textContent = '已暂停';
     } else {
-      statusLabel.textContent = getModeLabel(state.mode);
+      statusLabel.textContent =
+        state.mode === 'work' ? '专注中…' :
+        state.mode === 'break' ? '休息一下' : '深度放松';
     }
   }
+}
 
-  function updatePlayButton() {
-    if (state.running) {
-      btnPlay.textContent = '⏸';
-      btnPlay.classList.add('running');
-    } else {
-      btnPlay.textContent = '▶';
-      btnPlay.classList.remove('running');
-    }
+function updatePlayBtn() {
+  if (state.running) {
+    btnPlay.textContent = '⏸';
+    btnPlay.classList.add('running');
+  } else {
+    btnPlay.textContent = '▶';
+    btnPlay.classList.remove('running');
   }
+}
 
-  function updateStats() {
-    sessionEl.textContent = state.sessionCount;
-    totalMinEl.textContent = state.totalWorkMinutes;
-  }
+function updateModeTabs() {
+  modeTabs.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.mode === state.mode);
+  });
+}
 
-  function updateModeTabs() {
-    document.querySelectorAll('.mode-tab').forEach(tab => {
-      tab.classList.remove('active');
-      if (tab.dataset.mode === state.mode) tab.classList.add('active');
+function updateStats() {
+  sessionEl.textContent = state.todayPomos;
+  focusMinEl.textContent = state.todayFocusMin;
+  streakEl.textContent = state.streakDays;
+}
+
+function updateSoundBtn() {
+  soundToggle.textContent = state.soundEnabled ? '🔊' : '🔇';
+  if (!state.soundEnabled) soundToggle.classList.add('muted');
+  else soundToggle.classList.remove('muted');
+}
+
+function renderTasks() {
+  taskList.innerHTML = '';
+  const active = state.tasks.filter(t => !t.done);
+  const done = state.tasks.filter(t => t.done);
+
+  if (state.tasks.length === 0) {
+    taskList.innerHTML = '<li class="no-tasks">还没有任务，添加一个吧 ✨</li>';
+  } else {
+    [...active, ...done].forEach(task => {
+      const li = document.createElement('li');
+      li.className = 'task-item';
+      if (task.done) li.classList.add('done-item');
+      if (task.id === state.activeTaskId) li.classList.add('active-task');
+
+      const check = document.createElement('button');
+      check.className = 'task-check';
+      if (task.done) check.classList.add('done');
+      check.textContent = task.done ? '✓' : '';
+      check.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleTaskDone(task.id);
+      });
+
+      const name = document.createElement('span');
+      name.className = 'task-name';
+      name.textContent = task.name;
+
+      const pomos = document.createElement('span');
+      pomos.className = 'task-pomos';
+      for (let i = 0; i < task.estPomos; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'dot' + (i < task.donePomos ? ' earned' : '');
+        dot.textContent = '●';
+        pomos.appendChild(dot);
+      }
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'task-delete';
+      delBtn.textContent = '✕';
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteTask(task.id);
+      });
+
+      li.appendChild(check);
+      li.appendChild(name);
+      li.appendChild(pomos);
+      li.appendChild(delBtn);
+
+      // 点击行设为活跃任务
+      li.addEventListener('click', () => {
+        if (!task.done) setActiveTask(task.id);
+      });
+
+      taskList.appendChild(li);
     });
   }
 
-  function refreshUI() {
-    updateDisplay();
-    updateStatusLabel();
-    updatePlayButton();
-    updateModeTabs();
+  taskCountEl.textContent = state.tasks.length + ' 个任务';
+}
+
+function refreshUI() {
+  updateDisplay();
+  updatePlayBtn();
+  updateModeTabs();
+  updateStats();
+  updateSoundBtn();
+}
+
+// ==================== 任务操作 ====================
+function addTask() {
+  const name = taskInput.value.trim();
+  if (!name) return;
+  const est = Math.max(1, parseInt(estPomos.value) || 1);
+
+  state.tasks.unshift({
+    id: Date.now(),
+    name,
+    estPomos: est,
+    donePomos: 0,
+    done: false,
+  });
+
+  taskInput.value = '';
+  estPomos.value = '1';
+  saveData();
+  renderTasks();
+}
+
+function toggleTaskDone(id) {
+  const task = state.tasks.find(t => t.id === id);
+  if (!task) return;
+  task.done = !task.done;
+  if (task.done) task.donePomos = task.estPomos; // 完成所有番茄
+  else task.donePomos = 0;
+  if (task.id === state.activeTaskId && task.done) state.activeTaskId = null;
+  saveData();
+  renderTasks();
+}
+
+function deleteTask(id) {
+  state.tasks = state.tasks.filter(t => t.id !== id);
+  if (id === state.activeTaskId) state.activeTaskId = null;
+  saveData();
+  renderTasks();
+}
+
+function setActiveTask(id) {
+  state.activeTaskId = id;
+  saveData();
+  renderTasks();
+}
+
+function clearDoneTasks() {
+  state.tasks = state.tasks.filter(t => !t.done);
+  saveData();
+  renderTasks();
+  showToast('已清除完成的任务');
+}
+
+function incrementTaskPomo() {
+  if (!state.activeTaskId) return;
+  const task = state.tasks.find(t => t.id === state.activeTaskId);
+  if (!task || task.done) return;
+  task.donePomos = Math.min(task.estPomos, task.donePomos + 1);
+  if (task.donePomos >= task.estPomos) task.done = true;
+  saveData();
+  renderTasks();
+}
+
+// ==================== 核心逻辑 ====================
+function tick() {
+  if (!state.running) return;
+
+  state.secondsLeft--;
+
+  // 最后 3 秒滴答声
+  if (state.secondsLeft <= 3 && state.secondsLeft > 0 && state.mode === 'work') {
+    playTick();
   }
 
-  // ---- 音效 ----
-  function playChime() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = freq;
-        gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.15);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.4);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + i * 0.15);
-        osc.stop(ctx.currentTime + i * 0.15 + 0.4);
-      });
-    } catch (_) { /* 忽略 */ }
+  updateDisplay();
+
+  if (state.secondsLeft <= 0) {
+    finishSession();
   }
+}
 
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  }
+function finishSession() {
+  clearInterval(state.timerId);
+  state.timerId = null;
+  state.running = false;
 
-  // ---- 通知 ----
-  function notify(title, body) {
-    if (Notification.permission === 'granted') {
-      new Notification(title, { body, icon: '🍅' });
-    } else if (Notification.permission !== 'denied') {
-      Notification.requestPermission().then(p => {
-        if (p === 'granted') new Notification(title, { body, icon: '🍅' });
-      });
-    }
-  }
+  playChime();
 
-  // ---- 核心逻辑 ----
-  function tick() {
-    if (!state.running) return;
+  if (state.mode === 'work') {
+    // 完成一个番茄
+    state.todayPomos++;
+    state.todayFocusMin += Math.round(state.totalSeconds / 60);
+    incrementTaskPomo();
+    computeStreak();
+    saveData();
+    updateStats();
 
-    state.secondsLeft--;
+    notify('🍅 番茄完成！', `已完成 ${state.todayPomos} 个番茄，休息一下吧`);
+    showToast('🎉 ' + (state.activeTaskId ? '任务进度 +1！' : '番茄完成！休息一下吧～'));
 
-    if (state.secondsLeft <= 0) {
-      finishSession();
-      return;
-    }
-
-    updateDisplay();
-
-    // 最后 10 秒闪烁状态文字
-    if (state.secondsLeft <= 10) {
-      statusLabel.textContent = state.secondsLeft + ' 秒';
+    // 每 4 个番茄长休息
+    if (state.todayPomos % 4 === 0) {
+      switchMode('long-break');
     } else {
-      statusLabel.textContent = getModeLabel(state.mode);
+      switchMode('break');
     }
+    // 自动开始休息
+    autoStart();
+  } else {
+    const label = state.mode === 'long-break' ? '长休息结束' : '休息结束';
+    notify('⏰ ' + label, '准备好了吗？开始新的番茄吧！');
+    showToast('🔔 ' + label + '，开始专注吧！');
+    switchMode('work');
   }
 
-  function finishSession() {
-    clearInterval(state.timerId);
-    state.timerId = null;
-    state.running = false;
+  refreshUI();
+}
 
-    playChime();
-
-    if (state.mode === 'work') {
-      // 完成一个番茄
-      state.sessionCount++;
-      state.totalWorkMinutes += Math.round(state.totalSeconds / 60);
-      updateStats();
-      notify('🍅 番茄完成！', `你已完成 ${state.sessionCount} 个番茄，休息一下吧～`);
-      showToast('🎉 番茄完成！休息一下吧～');
-
-      // 每 4 个番茄给长休息
-      if (state.sessionCount % 4 === 0) {
-        switchMode('long-break');
-      } else {
-        switchMode('break');
-      }
-    } else {
-      // 休息结束
-      const label = state.mode === 'long-break' ? '长休息结束' : '休息结束';
-      notify('⏰ ' + label, '准备好了吗？开始新的番茄吧！');
-      showToast('🔔 ' + label + '，开始专注吧！');
-      switchMode('work');
-    }
-
-    refreshUI();
-  }
-
-  function switchMode(mode) {
-    state.mode = mode;
-    state.totalSeconds = getDuration(mode);
-    state.secondsLeft = state.totalSeconds;
-    updateModeTabs();
-    updateDisplay();
-    updateStatusLabel();
-  }
-
-  function startTimer() {
-    if (state.running) return;
-
-    // 如果计时器已归零，先重置
-    if (state.secondsLeft <= 0) {
-      state.secondsLeft = state.totalSeconds;
-    }
-
-    state.running = true;
-    state.timerId = setInterval(tick, 1000);
-    updatePlayButton();
-    updateStatusLabel();
-    statusLabel.textContent = getModeLabel(state.mode);
-  }
-
-  function pauseTimer() {
-    if (!state.running) return;
-    clearInterval(state.timerId);
-    state.timerId = null;
-    state.running = false;
-    updatePlayButton();
-    updateStatusLabel();
-  }
-
-  function toggleTimer() {
-    if (state.running) {
-      pauseTimer();
-    } else {
+function autoStart() {
+  // 休息自动开始
+  setTimeout(() => {
+    if (!state.running && state.secondsLeft === state.totalSeconds) {
       startTimer();
     }
-  }
+  }, 800);
+}
 
-  function resetTimer() {
-    pauseTimer();
-    state.secondsLeft = state.totalSeconds;
-    updateDisplay();
-    updateStatusLabel();
-  }
+function switchMode(mode) {
+  state.mode = mode;
+  state.totalSeconds = getDuration(mode);
+  state.secondsLeft = state.totalSeconds;
+  updateModeTabs();
+  updateDisplay();
+}
 
-  function skipSession() {
+function getDuration(mode) {
+  switch (mode) {
+    case 'work':       return parseInt(workInput.value) * 60;
+    case 'break':      return parseInt(breakInput.value) * 60;
+    case 'long-break': return parseInt(longBreakInput.value) * 60;
+    default:           return 25 * 60;
+  }
+}
+
+function startTimer() {
+  if (state.running) return;
+  if (state.secondsLeft <= 0) state.secondsLeft = state.totalSeconds;
+  state.running = true;
+  state.timerId = setInterval(tick, 1000);
+  updatePlayBtn();
+}
+
+function pauseTimer() {
+  if (!state.running) return;
+  clearInterval(state.timerId);
+  state.timerId = null;
+  state.running = false;
+  updatePlayBtn();
+}
+
+function toggleTimer() {
+  state.running ? pauseTimer() : startTimer();
+}
+
+function resetTimer() {
+  pauseTimer();
+  state.secondsLeft = state.totalSeconds;
+  updateDisplay();
+}
+
+function skipSession() {
+  pauseTimer();
+  state.secondsLeft = 0;
+  finishSession();
+  refreshUI();
+}
+
+function applySettings() {
+  const wasRunning = state.running;
+  if (wasRunning) pauseTimer();
+  state.totalSeconds = getDuration(state.mode);
+  state.secondsLeft = state.totalSeconds;
+  updateDisplay();
+  saveData();
+  if (wasRunning) startTimer();
+}
+
+// ==================== 事件绑定 ====================
+btnPlay.addEventListener('click', toggleTimer);
+$('btnReset').addEventListener('click', resetTimer);
+$('btnSkip').addEventListener('click', skipSession);
+$('btnAddTask').addEventListener('click', addTask);
+$('btnClearDone').addEventListener('click', clearDoneTasks);
+
+taskInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') addTask();
+});
+
+modeTabs.addEventListener('click', (e) => {
+  const tab = e.target.closest('.mode-tab');
+  if (!tab) return;
+  const mode = tab.dataset.mode;
+  if (mode && mode !== state.mode) {
     pauseTimer();
-    state.secondsLeft = 0;
-    finishSession();
+    switchMode(mode);
     refreshUI();
   }
+});
 
-  function applySettings() {
-    const wasRunning = state.running;
-    if (wasRunning) pauseTimer();
+soundToggle.addEventListener('click', () => {
+  state.soundEnabled = !state.soundEnabled;
+  updateSoundBtn();
+  saveData();
+});
 
-    state.totalSeconds = getDuration(state.mode);
-    state.secondsLeft = state.totalSeconds;
-    updateDisplay();
-    updateStatusLabel();
+[workInput, breakInput, longBreakInput].forEach(input => {
+  input.addEventListener('change', applySettings);
+});
 
-    if (wasRunning) startTimer();
+// 键盘快捷键
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  switch (e.code) {
+    case 'Space':
+      e.preventDefault();
+      toggleTimer();
+      break;
+    case 'KeyR': resetTimer(); break;
+    case 'KeyS': skipSession(); break;
+    case 'KeyM':
+      state.soundEnabled = !state.soundEnabled;
+      updateSoundBtn();
+      saveData();
+      break;
+    case 'Digit1':
+      pauseTimer(); switchMode('work'); refreshUI(); break;
+    case 'Digit2':
+      pauseTimer(); switchMode('break'); refreshUI(); break;
+    case 'Digit3':
+      pauseTimer(); switchMode('long-break'); refreshUI(); break;
   }
+});
 
-  // ---- 事件绑定 ----
-  btnPlay.addEventListener('click', toggleTimer);
-  btnReset.addEventListener('click', resetTimer);
-  btnSkip.addEventListener('click', skipSession);
+// 标题栏倒计时
+const origTitle = document.title;
+setInterval(() => {
+  if (state.running) {
+    document.title = `${formatTime(state.secondsLeft)} · ${state.mode === 'work' ? '🍅' : state.mode === 'break' ? '☕' : '🌿'}`;
+  } else {
+    document.title = origTitle;
+  }
+}, 1000);
 
-  modeTabs.addEventListener('click', (e) => {
-    const tab = e.target.closest('.mode-tab');
-    if (!tab) return;
-    const mode = tab.dataset.mode;
-    if (mode && mode !== state.mode) {
-      pauseTimer();
-      switchMode(mode);
-      refreshUI();
-    }
-  });
+// ==================== 初始化 ====================
+loadData();
+checkToday();
+state.totalSeconds = getDuration(state.mode);
+state.secondsLeft = state.totalSeconds;
+refreshUI();
+renderTasks();
+updateStats();
+updateSoundBtn();
 
-  settingsBtn.addEventListener('click', () => {
-    settingsPanel.classList.toggle('show');
-    settingsBtn.textContent = settingsPanel.classList.contains('show') ? '✕' : '⚙';
-  });
-
-  // 设置变更
-  [workInput, breakInput, longBreakInput].forEach(input => {
-    input.addEventListener('change', applySettings);
-  });
-
-  // 键盘快捷键
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT') return; // 不在输入框里触发
-    switch (e.code) {
-      case 'Space':
-        e.preventDefault();
-        toggleTimer();
-        break;
-      case 'KeyR':
-        resetTimer();
-        break;
-      case 'KeyS':
-        skipSession();
-        break;
-      case 'Digit1':
-        pauseTimer(); switchMode('work'); refreshUI();
-        break;
-      case 'Digit2':
-        pauseTimer(); switchMode('break'); refreshUI();
-        break;
-      case 'Digit3':
-        pauseTimer(); switchMode('long-break'); refreshUI();
-        break;
-    }
-  });
-
-  // 页面标题同步倒计时
-  const origTitle = document.title;
-  setInterval(() => {
-    if (state.running) {
-      document.title = `${formatTime(state.secondsLeft)} · 🍅`;
-    } else {
-      document.title = origTitle;
-    }
-  }, 1000);
-
-  // ---- 初始化 ----
-  refreshUI();
-  updateStats();
+// 请求通知权限
+if (Notification.permission === 'default') {
+  Notification.requestPermission();
+}
 </script>
 </body>
 </html>
